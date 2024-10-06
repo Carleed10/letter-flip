@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import "../src/wafle.css";
+import Animation from "./Animation";
+import confetti from 'canvas-confetti'; 
 
 const Wafle = () => {
   const words = [
@@ -85,6 +87,14 @@ const Wafle = () => {
     resetGame();
   }, []);
 
+  const handleConfetti = () => {
+    confetti({
+      particleCount: 250,
+      spread: 100,
+      origin: { y: 0.6 },
+    });
+  };
+
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -140,8 +150,10 @@ const Wafle = () => {
 
         if (isWordCorrect) {
           setTimeout(() => {
+            handleConfetti(); 
             alert("You won!");
             resetGame();
+            
           }, 200);
         } else {
           setAttempts((prevAttempts) => prevAttempts - 1);
@@ -177,7 +189,9 @@ const Wafle = () => {
   const currentWordMeaning = words.find(wordObj => wordObj.word === originalWord)?.meaning;
 
   return (
-    <div className="wrap">
+    <Animation>
+
+<div className="wrap">
       <div className="all">
         <h3>Re-arrange in the correct order, you have just 2 chances</h3>
 
@@ -185,6 +199,8 @@ const Wafle = () => {
           {selectedWord.split("").map((char, index) => (
             <div
               key={index}
+              data-aos="fade-down"
+              data-aos-duration="2000"
               className="incorrect"
               draggable // Allow all characters to be dragged
               onDragStart={() => handleDragStart(char, index)}
@@ -243,6 +259,8 @@ const Wafle = () => {
         {currentWordMeaning && <h5 style={{ color: 'white' }}> <span style={{color: 'yellow'}}>Word Meaning :</span> <br /> {currentWordMeaning}</h5>}
       </div>
     </div>
+
+    </Animation>
   );
 };
 
