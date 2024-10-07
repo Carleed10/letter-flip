@@ -82,9 +82,22 @@ const Wafle = () => {
   const [draggedChar, setDraggedChar] = useState(null);
   const [attempts, setAttempts] = useState(2);
   const [usedIndexes, setUsedIndexes] = useState(new Set()); // Track used character indexes for current attempt
+  const [isPhoneScreen, setIsPhoneScreen] = useState(false);
+
 
   useEffect(() => {
     resetGame();
+    const handleResize = () => {
+      const isPhoneScreen = window.innerWidth <= 568; // Adjust screen width for phones if needed
+      setIsPhoneScreen(isPhoneScreen);
+    };
+  
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call it once on component mount to set the initial state
+  
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const handleConfetti = () => {
@@ -202,7 +215,7 @@ const Wafle = () => {
               data-aos="fade-down"
               data-aos-duration="2000"
               className="incorrect"
-              draggable // Allow all characters to be dragged
+              draggable={!isPhoneScreen}
               onDragStart={() => handleDragStart(char, index)}
             >
               {char}
@@ -213,7 +226,7 @@ const Wafle = () => {
         <div className="input-fields">
           <div className="div-input">
             {inputFields.map((value, index) => (
-              <input
+              <input readOnly
                 key={index}
                 value={value}
                 onChange={(event) => handleInputChange(event, index)}
@@ -236,7 +249,7 @@ const Wafle = () => {
         <div className="input-fields2">
           <div className="div-input">
             {inputFields2.map((value, index) => (
-              <input
+              <input readOnly
                 key={index}
                 value={value}
                 onChange={(event) => handleInputChange(event, index, true)}
