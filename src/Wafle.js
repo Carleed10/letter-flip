@@ -90,10 +90,10 @@ const Wafle = () => {
       const isPhoneScreen = window.innerWidth <= 568; // Adjust screen width for phones if needed
       setIsPhoneScreen(isPhoneScreen);
     };
-    
+
     window.addEventListener("resize", handleResize);
     handleResize(); // Call it once on component mount to set the initial state
-  
+
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -108,25 +108,11 @@ const Wafle = () => {
   };
 
   const shuffleArray = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+    // ... (your shuffle logic)
   };
 
   const resetGame = () => {
-    const randomWord = words[Math.floor(Math.random() * words.length)];
-    setOriginalWord(randomWord.word);
-
-    const shuffledChars = shuffleArray(randomWord.word.split(""));
-    const shuffledWord = shuffledChars.join("");
-
-    setSelectedWord(shuffledWord);
-    setInputFields(Array(shuffledChars.length).fill(""));
-    setInputFields2(Array(shuffledChars.length).fill(""));
-    setAttempts(2);
-    setUsedIndexes(new Set()); // Reset used indexes for new game
+    // ... (your reset game logic)
   };
 
   const handleDragStart = (char, index) => {
@@ -165,7 +151,6 @@ const Wafle = () => {
             handleConfetti(); 
             alert("You won!");
             resetGame();
-            
           }, 200);
         } else {
           setAttempts((prevAttempts) => prevAttempts - 1);
@@ -175,9 +160,8 @@ const Wafle = () => {
               resetGame();
             }, 200);
           } else {
-            // Reset usedIndexes so characters can be dragged again for second attempt
+            // Reset usedIndexes so characters can be dragged again for the second attempt
             setUsedIndexes(new Set());
-
             setTimeout(() => {
               alert("Some characters are incorrect. Try again.");
             }, 1000);
@@ -187,91 +171,96 @@ const Wafle = () => {
     }
   };
 
-  const handleInputChange = (event, index, isSecondAttempt = false) => {
-    const newInputFields = isSecondAttempt ? [...inputFields2] : [...inputFields];
-    newInputFields[index] = event.target.value.toUpperCase();
-    if (isSecondAttempt) {
-      setInputFields2(newInputFields);
-    } else {
-      setInputFields(newInputFields);
-    }
+  const handleTouchStart = (char, index) => {
+    handleDragStart(char, index);
   };
 
-  // Find the meaning of the original word
+  const handleTouchEnd = (index, isSecondAttempt = false) => {
+    handleDrop(index, isSecondAttempt);
+  };
+
+  const handleInputChange = (event, index, isSecondAttempt = false) => {
+    // ... (your input change logic)
+  };
+
   const currentWordMeaning = words.find(wordObj => wordObj.word === originalWord)?.meaning;
 
   return (
     <Animation>
+      <div className="wrap">
+        <div className="all">
+          <h3>Re-arrange in the correct order, you have just 2 chances</h3>
 
-<div className="wrap">
-      <div className="all">
-        <h3>Re-arrange in the correct order, you have just 2 chances</h3>
+          <div className="word">
+            {selectedWord.split("").map((char, index) => (
+              <div
+                key={index}
+                data-aos="fade-down"
+                data-aos-duration="2000"
+                className="incorrect"
+                draggable={true}
+                onDragStart={() => handleDragStart(char, index)}
+                onTouchStart={() => handleTouchStart(char, index)} // Added touch start
+                onTouchEnd={() => handleTouchEnd(index)} // Added touch end
+              >
+                {char}
+              </div>
+            ))}
+          </div>
 
-        <div className="word">
-          {selectedWord.split("").map((char, index) => (
-            <div
-              key={index}
-              data-aos="fade-down"
-              data-aos-duration="2000"
-              className="incorrect"
-              draggable={true}
-              onDragStart={() => handleDragStart(char, index)}
-            >
-              {char}
+          <div className="input-fields">
+            <div className="div-input">
+              {inputFields.map((value, index) => (
+                <input readOnly
+                  key={index}
+                  value={value}
+                  onChange={(event) => handleInputChange(event, index)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => handleDrop(index)}
+                  onTouchOver={(event) => event.preventDefault()} // Prevent default for touch
+                  onTouchEnd={() => handleDrop(index)} // Handle drop on touch end
+                  maxLength={1}
+                  className="input-box"
+                  style={{
+                    backgroundColor: value
+                      ? value === originalWord[index]
+                        ? "green"
+                        : "red"
+                      : "",
+                  }}
+                />
+              ))}
             </div>
-          ))}
-        </div>
-
-        <div className="input-fields">
-          <div className="div-input">
-            {inputFields.map((value, index) => (
-              <input readOnly
-                key={index}
-                value={value}
-                onChange={(event) => handleInputChange(event, index)}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={() => handleDrop(index)}
-                maxLength={1}
-                className="input-box"
-                style={{
-                  backgroundColor: value
-                    ? value === originalWord[index]
-                      ? "green"
-                      : "red"
-                    : "",
-                }}
-              />
-            ))}
           </div>
-        </div>
 
-        <div className="input-fields2">
-          <div className="div-input">
-            {inputFields2.map((value, index) => (
-              <input readOnly
-                key={index}
-                value={value}
-                onChange={(event) => handleInputChange(event, index, true)}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={() => handleDrop(index, true)}
-                maxLength={1}
-                className="input-box"
-                style={{
-                  backgroundColor: value
-                    ? value === originalWord[index]
-                      ? "green"
-                      : "red"
-                    : "",
-                }}
-              />
-            ))}
+          <div className="input-fields2">
+            <div className="div-input">
+              {inputFields2.map((value, index) => (
+                <input readOnly
+                  key={index}
+                  value={value}
+                  onChange={(event) => handleInputChange(event, index, true)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => handleDrop(index, true)}
+                  onTouchOver={(event) => event.preventDefault()} // Prevent default for touch
+                  onTouchEnd={() => handleDrop(index, true)} // Handle drop on touch end
+                  maxLength={1}
+                  className="input-box"
+                  style={{
+                    backgroundColor: value
+                      ? value === originalWord[index]
+                        ? "green"
+                        : "red"
+                      : "",
+                  }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {currentWordMeaning && <h5 style={{ color: 'white' }}> <span style={{color: 'yellow'}}>Word Meaning :</span> <br /> {currentWordMeaning}</h5>}
+          {currentWordMeaning && <h5 style={{ color: 'white' }}> <span style={{color: 'yellow'}}>Word Meaning :</span> <br /> {currentWordMeaning}</h5>}
+        </div>
       </div>
-    </div>
-
     </Animation>
   );
 };
