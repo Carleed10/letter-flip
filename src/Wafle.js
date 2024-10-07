@@ -84,14 +84,13 @@ const Wafle = () => {
   const [usedIndexes, setUsedIndexes] = useState(new Set()); // Track used character indexes for current attempt
   const [isPhoneScreen, setIsPhoneScreen] = useState(false);
 
-
   useEffect(() => {
     resetGame();
     const handleResize = () => {
       const isPhoneScreen = window.innerWidth <= 568; // Adjust screen width for phones if needed
       setIsPhoneScreen(isPhoneScreen);
     };
-  
+    
     window.addEventListener("resize", handleResize);
     handleResize(); // Call it once on component mount to set the initial state
   
@@ -215,7 +214,7 @@ const Wafle = () => {
               data-aos="fade-down"
               data-aos-duration="2000"
               className="incorrect"
-              draggable={!isPhoneScreen}
+              draggable={true}
               onDragStart={() => handleDragStart(char, index)}
             >
               {char}

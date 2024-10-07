@@ -58,6 +58,8 @@
     /* flex-direction: column; */
     /* background-color: aqua; */
 }
+
+ 
 .div-input{
     width: 100%;
     display: flex;
@@ -82,9 +84,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
+    padding: 10px; 
+    cursor: grab;
 
 }
+.incorrect:active {
+    cursor: grabbing;
+  }
+  
 
 .input-fields input, .input-fields2 input {
     width: 35px;
