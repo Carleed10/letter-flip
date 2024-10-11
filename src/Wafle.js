@@ -82,22 +82,22 @@ const Wafle = () => {
   const [draggedChar, setDraggedChar] = useState(null);
   const [attempts, setAttempts] = useState(2);
   const [usedIndexes, setUsedIndexes] = useState(new Set()); // Track used character indexes for current attempt
-const [isPhoneScreen, setIsPhoneScreen] = useState(false);
+  const [isPhoneScreen, setIsPhoneScreen] = useState(false);
 
-useEffect(() => {
-  resetGame();
-  const handleResize = () => {
-    const isPhoneScreen = window.innerWidth <= 568; // Adjust screen width for phones if needed
-    setIsPhoneScreen(isPhoneScreen);
-  };
-  
-  window.addEventListener("resize", handleResize);
-  handleResize(); // Call it once on component mount to set the initial state
+  useEffect(() => {
+    resetGame();
+    const handleResize = () => {
+      const isPhoneScreen = window.innerWidth <= 568; // Adjust screen width for phones if needed
+      setIsPhoneScreen(isPhoneScreen);
+    };
+    
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call it once on component mount to set the initial state
 
-  return () => {
-    window.removeEventListener("resize", handleResize);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const handleConfetti = () => {
     confetti({
@@ -130,11 +130,13 @@ useEffect(() => {
   };
 
   const handleDragStart = (char, index) => {
-    setDraggedChar({ char, index });
+    if (!isPhoneScreen) {
+      setDraggedChar({ char, index });
+    }
   };
 
   const handleDrop = (index, isSecondAttempt = false) => {
-    if (!draggedChar) return;
+    if (!draggedChar || isPhoneScreen) return;
 
     const newInputFields = isSecondAttempt ? [...inputFields2] : [...inputFields];
 
@@ -165,7 +167,6 @@ useEffect(() => {
             handleConfetti(); 
             alert("You won!");
             resetGame();
-            
           }, 200);
         } else {
           setAttempts((prevAttempts) => prevAttempts - 1);
@@ -187,15 +188,6 @@ useEffect(() => {
     }
   };
 
-  const handleTouchStart = (char, index) => {
-    handleDragStart(char, index);
-  };
-  
-  const handleTouchEnd = (index, isSecondAttempt = false) => {
-    handleDrop(index, isSecondAttempt);
-  };
-  
-
   const handleInputChange = (event, index, isSecondAttempt = false) => {
     const newInputFields = isSecondAttempt ? [...inputFields2] : [...inputFields];
     newInputFields[index] = event.target.value.toUpperCase();
@@ -211,82 +203,78 @@ useEffect(() => {
 
   return (
     <Animation>
+      <div className="wrap">
+        <div className="all">
+          <h3>Re-arrange in the correct order, you have just 2 chances</h3>
 
-<div className="wrap">
-      <div className="all">
-        <h3>Re-arrange in the correct order, you have just 2 chances</h3>
+          <div className="word">
+            {selectedWord.split("").map((char, index) => (
+              <div
+                key={index}
+                data-aos="fade-down"
+                data-aos-duration="2000"
+                className="incorrect"
+                draggable={!isPhoneScreen} // Disable drag on phones
+                onDragStart={() => handleDragStart(char, index)}
+              >
+                {char}
+              </div>
+            ))}
+          </div>
 
-        <div className="word">
-          {selectedWord.split("").map((char, index) => (
-            <div
-              key={index}
-              data-aos="fade-down"
-              data-aos-duration="2000"
-              className="incorrect"
-              draggable={true}
-              onDragStart={() => handleDragStart(char, index)}
-              onTouchStart={() => handleTouchStart(char, index)} // Added touch start
-              onTouchEnd={() => handleTouchEnd(index)}
-            >
-              {char}
+          <div className="input-fields">
+            <div className="div-input">
+              {inputFields.map((value, index) => (
+                <input readOnly
+                  key={index}
+                  value={value}
+                  onChange={(event) => handleInputChange(event, index)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => handleDrop(index)}
+                  maxLength={1}
+                  className="input-box"
+                  style={{
+                    backgroundColor: value
+                      ? value === originalWord[index]
+                        ? "green"
+                        : "red"
+                      : "",
+                  }}
+                />
+              ))}
             </div>
-          ))}
-        </div>
-
-        <div className="input-fields">
-          <div className="div-input">
-            {inputFields.map((value, index) => (
-              <input readOnly
-                key={index}
-                value={value}
-                onChange={(event) => handleInputChange(event, index)}
-                onDragOver={(event) => event.preventDefault()}
-  onDrop={() => handleDrop(index)}
-  onTouchOver={(event) => event.preventDefault()} // Prevent default for touch
-  onTouchEnd={() => handleDrop(index)} 
-                maxLength={1}
-                className="input-box"
-                style={{
-                  backgroundColor: value
-                    ? value === originalWord[index]
-                      ? "green"
-                      : "red"
-                    : "",
-                }}
-              />
-            ))}
           </div>
-        </div>
 
-        <div className="input-fields2">
-          <div className="div-input">
-            {inputFields2.map((value, index) => (
-              <input readOnly
-                key={index}
-                value={value}
-                onChange={(event) => handleInputChange(event, index, true)}
-                onDragOver={(event) => event.preventDefault()}
-  onDrop={() => handleDrop(index)}
-  onTouchOver={(event) => event.preventDefault()} // Prevent default for touch
-  onTouchEnd={() => handleDrop(index)} 
-                maxLength={1}
-                className="input-box"
-                style={{
-                  backgroundColor: value
-                    ? value === originalWord[index]
-                      ? "green"
-                      : "red"
-                    : "",
-                }}
-              />
-            ))}
+          <div className="input-fields2">
+            <div className="div-input">
+              {inputFields2.map((value, index) => (
+                <input readOnly
+                  key={index}
+                  value={value}
+                  onChange={(event) => handleInputChange(event, index, true)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => handleDrop(index, true)}
+                  maxLength={1}
+                  className="input-box"
+                  style={{
+                    backgroundColor: value
+                      ? value === originalWord[index]
+                        ? "green"
+                        : "red"
+                      : "",
+                  }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {currentWordMeaning && <h5 style={{ color: 'white' }}> <span style={{color: 'yellow'}}>Word Meaning :</span> <br /> {currentWordMeaning}</h5>}
+          {currentWordMeaning && <h5 style={{ color: 'white' }}> <span style={{color: 'yellow'}}>Word Meaning :</span> <br /> {currentWordMeaning}</h5>}
+        </div>
       </div>
-    </div>
 
+      <div className="wrap2">
+        <h4>Game can only be played <br /> on a desktop screen size</h4>
+      </div>
     </Animation>
   );
 };
